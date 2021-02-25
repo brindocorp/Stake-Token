@@ -517,6 +517,12 @@ contract BEP20 is Initializable, Context, IBEP20 {
     mapping (address => mapping (address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
+    
+     function convert(uint256 _amount) internal pure virtual returns(uint256){
+        uint256 _realAmount=_amount*(1000000000000000000);
+        return _realAmount;
+    }
+
 
     /**
      * @dev See {IBEP20-totalSupply}.
@@ -541,7 +547,7 @@ contract BEP20 is Initializable, Context, IBEP20 {
      * - the caller must have a balance of at least `amount`.
      */
     function transfer(address recipient, uint256 amount) public override returns (bool) {
-        _transfer(_msgSender(), recipient, amount);
+        _transfer(_msgSender(), recipient, convert(amount));
         return true;
     }
 
@@ -560,7 +566,7 @@ contract BEP20 is Initializable, Context, IBEP20 {
      * - `spender` cannot be the zero address.
      */
     function approve(address spender, uint256 amount) public override returns (bool) {
-        _approve(_msgSender(), spender, amount);
+        _approve(_msgSender(), spender, convert(amount));
         return true;
     }
 
@@ -577,7 +583,7 @@ contract BEP20 is Initializable, Context, IBEP20 {
      * `amount`.
      */
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
-        _transfer(sender, recipient, amount);
+        _transfer(sender, recipient, convert(amount));
         _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "BEP20: transfer amount exceeds allowance"));
         return true;
     }
@@ -595,7 +601,7 @@ contract BEP20 is Initializable, Context, IBEP20 {
      * - `spender` cannot be the zero address.
      */
     function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
+        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(convert(addedValue)));
         return true;
     }
 
@@ -614,7 +620,8 @@ contract BEP20 is Initializable, Context, IBEP20 {
      * `subtractedValue`.
      */
     function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "BEP20: decreased allowance below zero"));
+        uint256 _real=convert(subtractedValue);
+        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(_real, "BEP20: decreased allowance below zero"));
         return true;
     }
 
@@ -798,7 +805,12 @@ contract BEP20Stakes is Initializable, BEP20 {
    * @dev A method for a stakeholder to create a stake
    */
     function createStake(uint256 stake) external {
-        _createStake(_msgSender(), stake);
+        _createStake(_msgSender(), convert(stake));
+    }
+    
+    function convert(uint256 _amount) internal pure override returns(uint256){
+        uint256 _realAmount=_amount*(1000000000000000000);
+        return _realAmount;
     }
 
     /**
@@ -821,14 +833,14 @@ contract BEP20Stakes is Initializable, BEP20 {
      * @param stake The size of the stake to be created.
      */
     function _createStake(address stakeholder, uint256 stake) internal onlyNoStakeYet(stakeholder) {
-        _burn(stakeholder, stake);
+        _burn(stakeholder, convert(stake));
         _stakes[stakeholder] = Stake({
-            amount : stake,
+            amount : convert(stake),
             stakedAt : now,
             heldAt : 0
             });
         _addStakeholder(stakeholder);
-        emit StakeCreate(stakeholder,  stake);
+        emit StakeCreate(stakeholder,  convert(stake));
 
     }
 
@@ -946,7 +958,7 @@ contract Token is Initializable, Ownable, BEP20Stakes, BEP20Detailed {
         Ownable.initialize(initialHolder);
         BEP20Detailed.initialize(name, symbol, decimals);
         // Mint the initial supply
-        _mint(initialHolder, initialSupply); // * 10 ** uint256(decimals)
+        _mint(initialHolder, convert(initialSupply)); // * 10 ** uint256(decimals)
 
 
 //        uint256 constant _holdPeriod = 2 minutes;
