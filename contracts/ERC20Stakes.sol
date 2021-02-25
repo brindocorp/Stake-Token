@@ -1,11 +1,11 @@
 pragma solidity ^0.5.0;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "./@openzeppelin/upgrades/contracts/Initializable.sol";
+import {ERC20}  from "./@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "./@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 /**
- * @dev Extension of {ERC20} that implements a basic ERC20 staking
+ * @dev Extension of {BEP20} that implements a basic BEP20 staking
  * with incentive distribution.
  */
 contract ERC20Stakes is Initializable, ERC20 {
@@ -13,9 +13,9 @@ contract ERC20Stakes is Initializable, ERC20 {
 
     // TODO change to real
     uint256 private _holdPeriod; // = 2 minutes; 
-    uint256 private _dailyPercent; // = 1; // 1%
+    uint256 private _annualPercent; // = 50; // 50%
     uint256 private _basePeriod; // = 30 seconds
-    uint256 private _dailyPeriod; // =  // 1 day
+    uint256 private _annualPeriod; // =  // 1 year
 
     event StakeCreate(address indexed stakeholder, uint256 stake);
     event StakeHold(address indexed stakeholder);
@@ -62,11 +62,11 @@ contract ERC20Stakes is Initializable, ERC20 {
     }
 
 
-    function _stakeParams(uint256 basePeriod, uint256 holdPeriod, uint256 dailyPercent, uint256 dailyPeriod) internal {
+    function _stakeParams(uint256 basePeriod, uint256 holdPeriod, uint256 annualPercent, uint256 annualPeriod) internal {
         _holdPeriod = holdPeriod;
         _dailyPercent = dailyPercent;
         _basePeriod = basePeriod;
-        _dailyPeriod = dailyPeriod.mul(100);
+        _annualPeriod = annualPeriod.mul(100);
     }
 
     function stakeBasePeriod() external view returns (uint256) {
@@ -78,7 +78,7 @@ contract ERC20Stakes is Initializable, ERC20 {
     function stakeAnnualPercent() external view returns (uint256) {
         return _dailyPercent;
     }
-    function stakeDailyPeriod() external view returns (uint256) {
+    function stakeAnnualPeriod() external view returns (uint256) {
         return _dailyPeriod / 100;
     }
 

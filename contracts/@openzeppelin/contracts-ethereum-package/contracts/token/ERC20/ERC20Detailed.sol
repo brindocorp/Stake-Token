@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
-import "./IERC20.sol";
+import "../../../upgrades/contracts/Initializable.sol";
+import "../../../../../IBEP20.sol";
 
 /**
  * @dev Optional functions from the ERC20 standard.
